@@ -63,13 +63,17 @@ progress_bar() {
 }
 
 loading() {
-    echo -ne "${YELLOW}[*] Processing..."
+    echo -ne "${YELLOW}[*] Processing"
     for i in {1..3}; do
         echo -ne "."
         sleep 0.4
     done
     echo ""
-    progress_bar 2
+    for i in {1..3}; do
+        echo -ne "${YELLOW}>>>${NC} "
+        sleep 0.2
+    done
+    echo ""
 }
 
 # WHOIS
