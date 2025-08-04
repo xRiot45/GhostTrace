@@ -108,7 +108,7 @@ dns_records() {
 subdomain_enum() {
     print_box "Enumerating subdomains for $TARGET" "${CYAN}"
     loading
-    subfinder -d $TARGET >"$RAW_DIR/subdomains.txt"
+    subfinder -d $TARGET 2>/dev/null >"$RAW_DIR/subdomains.txt"
     echo -e "${GREEN}[+] Subdomains saved to $RAW_DIR/subdomains.txt${NC}"
 }
 
