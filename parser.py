@@ -21,8 +21,6 @@ def read_file(filename):
 whois_data = read_file("whois.txt")
 dns_data = read_file("dns.txt")
 subdomains_data = read_file("subdomains.txt")
-ports_data = read_file("ports.txt")   # Future stage
-robots_data = read_file("robots.txt") # Future stage
 hosting_data = read_file("hosting.json")
 ssl_cert_data = read_file("ssl_cert.txt")
 
@@ -35,7 +33,5 @@ with open(output_file, mode="w", newline="", encoding="utf-8") as file:
     writer.writerow(["Subdomains", "Detected Subdomains", subdomains_data])
     writer.writerow(["Hosting", "Server Hosting Info", hosting_data])
     writer.writerow(["SSL/TLS", "SSL Certificate Details", ssl_cert_data])
-    writer.writerow(["Ports", "Open Ports (Stage 2)", ports_data])
-    writer.writerow(["robots.txt", "robots.txt Content (Stage 3)", robots_data])
 
 print(f"[+] Footprinting report generated: {output_file}")
