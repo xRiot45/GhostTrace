@@ -84,7 +84,23 @@ whois_info() {
 dns_records() {
     print_box "Collecting DNS records for $TARGET" "${CYAN}"
     loading
-    dig $TARGET any +short >"$RAW_DIR/dns.txt"
+
+    records="A AAAA MX TXT NS CNAME"
+    >"$RAW_DIR/dns.txt"
+
+    for record in $records; do
+        echo "=== $record Records ===" >>"$RAW_DIR/dns.txt"
+        result=$(dig $TARGET $record +short @8.8.8.8)
+
+        if [ -z "$result" ] || [[ "$result" == *"timed out"* ]] || [[ "$result" == *"no servers could be reached"* ]]; then
+            echo "No $record record found or query failed" >>"$RAW_DIR/dns.txt"
+        else
+            echo "$result" >>"$RAW_DIR/dns.txt"
+        fi
+
+        echo "" >>"$RAW_DIR/dns.txt"
+    done
+
     echo -e "${GREEN}[+] DNS records saved to $RAW_DIR/dns.txt${NC}"
 }
 

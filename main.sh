@@ -67,7 +67,7 @@ clear
 echo -e "${CYAN}"
 figlet -f slant "GhostTrace"
 echo -e "${NC}"
-echo -e "${PURPLE}Author:${NC} Cyber Recon Tool"
+echo -e "${PURPLE}Author:${NC} xRiot45"
 echo -e "${PURPLE}Target:${NC} $TARGET"
 echo -e "${YELLOW}=============================================${NC}"
 
@@ -76,7 +76,7 @@ source stages/general_info.sh
 
 while true; do
     echo ""
-    print_box "GHOSTTRACE - Footprinting Tool Main Menu" "${GREEN}"
+    print_box "GhostTrace - Footprinting Tool Main Menu" "${GREEN}"
     echo -e "${CYAN}Target:${NC} $TARGET"
     echo ""
     echo -e "${YELLOW}1)${NC} Stage 1: General Domain & Website Information"
