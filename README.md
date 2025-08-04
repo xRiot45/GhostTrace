@@ -1,5 +1,5 @@
 # GhostTrace Documentation
 
 ```bash
-$ sudo apt install whois dnsutils curl subfinder openssl -y
+$ sudo apt install whois dnsutils curl subfinder openssl figlet -y
 ```
