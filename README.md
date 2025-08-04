@@ -63,7 +63,7 @@ subfinder -version
 Clone the repository and give execution permissions:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/xRiot45/GhostTrace.git
 cd GhostTrace
 chmod +x main.sh
 ```
@@ -75,13 +75,13 @@ chmod +x main.sh
 Run the main script with a target domain:
 
 ```bash
-./main.sh <domain>
+sudo ./main.sh <domain>
 ```
 
 Example:
 
 ```bash
-./main.sh example.com
+sudo ./main.sh example.com
 ```
 
 ---
