@@ -5,7 +5,7 @@ TARGET=$1
 # Remove protocol (http:// or https://) if user provides full URL
 TARGET=$(echo $TARGET | sed -e 's~^[^/]*//~~' -e 's~/.*$~~')
 
-RAW_DIR="results/raw/$TARGET" # <-- Folder khusus untuk target
+RAW_DIR="results/raw/$TARGET" # <-- Special folder for each target
 
 # WHOIS
 whois_info() {
