@@ -4,58 +4,75 @@ TARGET=$TARGET
 TARGET=$(echo $TARGET | sed -e 's~^[^/]*//~~' -e 's~/.*$~~') # Remove protocol
 
 RAW_DIR_TECH="results/raw/$TARGET/technology_info"
+mkdir -p "$RAW_DIR_TECH"
 
-# Detect Web Server
-detect_web_server() {
+# Jalankan fingerprinting menggunakan Wappalyzer + curl
+detect_technologies() {
+    local url_http="http://$TARGET"
+    local url_https="https://$TARGET"
+
+    print_box "Running Wappalyzer Fingerprint on $TARGET" "${CYAN}"
+    loading
+
+    # Jalankan wappalyzer (HTTP + HTTPS) dan simpan JSON hasilnya
+    wappalyzer "$url_http" --pretty >"$RAW_DIR_TECH/wappalyzer_http.json" 2>/dev/null
+    wappalyzer "$url_https" --pretty >"$RAW_DIR_TECH/wappalyzer_https.json" 2>/dev/null
+
+    # Ambil headers juga untuk info tambahan
+    curl -s -I "$url_http" >"$RAW_DIR_TECH/http_headers.txt"
+    curl -s -I "$url_https" >"$RAW_DIR_TECH/https_headers.txt"
+}
+
+# Extract info dari wappalyzer JSON
+parse_web_server() {
     print_box "Detecting Web Server for $TARGET" "${CYAN}"
     loading
-    mkdir -p "$RAW_DIR_TECH"
-    curl -s -I "http://$TARGET" | grep -i "Server:" >"$RAW_DIR_TECH/web_server.txt"
-    curl -s -I "https://$TARGET" | grep -i "Server:" >>"$RAW_DIR_TECH/web_server.txt"
+    grep -i "Server:" "$RAW_DIR_TECH/http_headers.txt" >"$RAW_DIR_TECH/web_server.txt"
+    grep -i "Server:" "$RAW_DIR_TECH/https_headers.txt" >>"$RAW_DIR_TECH/web_server.txt"
     echo -e "${GREEN}[+] Web server info saved to $RAW_DIR_TECH/web_server.txt${NC}"
 }
 
-# Detect CMS / Framework
-detect_cms_framework() {
-    print_box "Detecting CMS / Framework for $TARGET" "${CYAN}"
+parse_cms_framework() {
+    print_box "Detecting CMS / Framework via Wappalyzer" "${CYAN}"
     loading
-    mkdir -p "$RAW_DIR_TECH"
-    whatweb $TARGET --color=never >"$RAW_DIR_TECH/cms_framework.txt"
+    jq '.technologies[] | select(.categories[]?.name == "CMS" or .categories[]?.name == "Frameworks") | .name' \
+        "$RAW_DIR_TECH/wappalyzer_http.json" "$RAW_DIR_TECH/wappalyzer_https.json" \
+        >"$RAW_DIR_TECH/cms_framework.txt"
     echo -e "${GREEN}[+] CMS / Framework info saved to $RAW_DIR_TECH/cms_framework.txt${NC}"
 }
 
-# Detect Programming Languages
-detect_languages() {
-    print_box "Detecting Programming Languages for $TARGET" "${CYAN}"
+parse_languages() {
+    print_box "Detecting Programming Languages via Wappalyzer" "${CYAN}"
     loading
-    mkdir -p "$RAW_DIR_TECH"
-    curl -s -I "http://$TARGET" | grep -i "X-Powered-By:" >"$RAW_DIR_TECH/languages.txt"
-    curl -s -I "https://$TARGET" | grep -i "X-Powered-By:" >>"$RAW_DIR_TECH/languages.txt"
+    grep -i "X-Powered-By:" "$RAW_DIR_TECH/http_headers.txt" >"$RAW_DIR_TECH/languages.txt"
+    grep -i "X-Powered-By:" "$RAW_DIR_TECH/https_headers.txt" >>"$RAW_DIR_TECH/languages.txt"
+    jq '.technologies[] | select(.categories[]?.name == "Programming languages") | .name' \
+        "$RAW_DIR_TECH/wappalyzer_http.json" "$RAW_DIR_TECH/wappalyzer_https.json" \
+        >>"$RAW_DIR_TECH/languages.txt"
     echo -e "${GREEN}[+] Programming languages info saved to $RAW_DIR_TECH/languages.txt${NC}"
 }
 
-# Detect Database (indikasi umum)
-detect_database() {
-    print_box "Checking Database Indicators for $TARGET" "${CYAN}"
+parse_database() {
+    print_box "Checking Database Indicators via Wappalyzer" "${CYAN}"
     loading
-    mkdir -p "$RAW_DIR_TECH"
-    curl -s "http://$TARGET" | grep -iE "MySQL|PostgreSQL|MongoDB|SQLite" >"$RAW_DIR_TECH/database.txt"
-    curl -s "https://$TARGET" | grep -iE "MySQL|PostgreSQL|MongoDB|SQLite" >>"$RAW_DIR_TECH/database.txt"
+    jq '.technologies[] | select(.categories[]?.name == "Databases") | .name' \
+        "$RAW_DIR_TECH/wappalyzer_http.json" "$RAW_DIR_TECH/wappalyzer_https.json" \
+        >"$RAW_DIR_TECH/database.txt"
     echo -e "${GREEN}[+] Database indicators saved to $RAW_DIR_TECH/database.txt${NC}"
 }
 
-# Detect Libraries / Plugins
-detect_libraries_plugins() {
-    print_box "Detecting Libraries & Plugins for $TARGET" "${CYAN}"
+parse_libraries_plugins() {
+    print_box "Detecting Libraries & Plugins via Wappalyzer" "${CYAN}"
     loading
-    mkdir -p "$RAW_DIR_TECH"
-    whatweb $TARGET --color=never >"$RAW_DIR_TECH/libraries_plugins.txt"
+    jq '.technologies[] | select(.categories[]?.name == "JavaScript frameworks" or .categories[]?.name == "UI frameworks") | .name' \
+        "$RAW_DIR_TECH/wappalyzer_http.json" "$RAW_DIR_TECH/wappalyzer_https.json" \
+        >"$RAW_DIR_TECH/libraries_plugins.txt"
     echo -e "${GREEN}[+] Libraries / Plugins info saved to $RAW_DIR_TECH/libraries_plugins.txt${NC}"
 }
 
 # Menu Stage 2
 run_phase2() {
-    mkdir -p "$RAW_DIR_TECH"
+    detect_technologies
 
     while true; do
         echo ""
@@ -73,17 +90,17 @@ run_phase2() {
         read -p "Enter your choice: " choice
 
         case $choice in
-        1) detect_web_server ;;
-        2) detect_cms_framework ;;
-        3) detect_languages ;;
-        4) detect_database ;;
-        5) detect_libraries_plugins ;;
+        1) parse_web_server ;;
+        2) parse_cms_framework ;;
+        3) parse_languages ;;
+        4) parse_database ;;
+        5) parse_libraries_plugins ;;
         6)
-            detect_web_server
-            detect_cms_framework
-            detect_languages
-            detect_database
-            detect_libraries_plugins
+            parse_web_server
+            parse_cms_framework
+            parse_languages
+            parse_database
+            parse_libraries_plugins
             ;;
         0) break ;;
         *) echo -e "${RED}Invalid option.${NC}" ;;
