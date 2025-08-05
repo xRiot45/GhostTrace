@@ -26,6 +26,7 @@ echo -e "${YELLOW}────────────────────�
 # Load stage scripts
 source utils.sh
 source stages/general_info.sh
+source stages/technology_info.sh
 
 while true; do
     echo ""
@@ -33,7 +34,7 @@ while true; do
     echo -e "${CYAN}Target:${NC} $TARGET"
     echo ""
     echo -e "${YELLOW}1)${NC} Stage 1: General Domain & Website Information"
-    echo -e "${YELLOW}2)${NC} Stage 2: Web Application Technology Info ${CYAN}(Coming soon)${NC}"
+    echo -e "${YELLOW}2)${NC} Stage 2: Web Application Technology Info"
     echo -e "${YELLOW}5)${NC} Generate Report (CSV)"
     echo -e "${YELLOW}0)${NC} Exit"
     echo ""
@@ -41,6 +42,7 @@ while true; do
 
     case $choice in
     1) run_phase1 ;;
+    2) run_phase2 ;;
     5) python3 parser.py $TARGET ;;
     0)
         echo -e "${GREEN}Exiting GhostTrace...${NC}"
