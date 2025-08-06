@@ -2,100 +2,124 @@
 
 ## Overview
 
-GhostTrace is a command-line tool designed for performing the **footprinting phase** of penetration testing or security assessments. It automates the process of collecting general information about a target domain, including WHOIS data, DNS records, subdomain enumeration, hosting details, and SSL/TLS certificate information.
+GhostTrace is a **command-line tool** for the **footprinting phase** in penetration testing or security assessments. It automates the collection of general information about target domains and the web technologies in use.
 
-The tool provides:
+Main modules of GhostTrace include:
 
-* Clean and interactive terminal UI with minimal colors and glitch/typing effects.
-* Structured output saved into raw text/JSON files.
-* CSV report generation for collected data.
-* Modular architecture allowing future expansion (e.g., technology detection, vulnerability scanning).
+* **Stage 1**: General Domain & Website Information (WHOIS, DNS, Subdomains, Hosting, SSL/TLS)
+* **Stage 2**: Web Application Technology Information (Server, CMS/Framework, Programming Languages, Databases, Libraries/Plugins)
+
+Scan results are organized into the `data/raw` directory and can be converted to CSV format using `parser.py`.
 
 ---
 
 ## Features
 
-* **WHOIS Information Collection**: Retrieves domain registration data.
-* **DNS Records Gathering**: Collects A, AAAA, MX, TXT, NS, and CNAME records.
-* **Subdomain Enumeration**: Uses `subfinder` to enumerate subdomains quickly.
-* **Hosting/Geo-IP Info**: Fetches server location and ASN data via IP resolution and external APIs.
-* **SSL/TLS Certificate Details**: Extracts certificate validity, issuer, subject, and SAN fields.
-* **CSV Report Generation**: Consolidates raw data into a readable CSV format.
+### Stage 1: General Information
+
+* WHOIS Information
+* DNS Records
+* Subdomain Enumeration
+* Hosting/Geo-IP Information
+* SSL/TLS Certificate Details
+
+### Stage 2: Technology Information
+
+* Web Server Detection (HTTP Headers)
+* CMS/Framework Detection (Wappalyzer + Playwright)
+* Programming Language Detection (X-Powered-By header)
+* Database Indicators (MySQL, PostgreSQL, MongoDB, SQLite)
+* Libraries/Plugins Detection (Wappalyzer)
+
+### Additional
+
+* CSV Report Generation
+* Modular design for future expansion (Stage 3: Vulnerability enumeration)
+* Structured scan output (raw & parsed)
 
 ---
 
 ## Requirements
 
-* **Operating System**: Linux (tested on Debian)
-* **Dependencies**:
+### Operating System
 
-  * `whois`
-  * `dig` (DNS utilities)
-  * `curl`
-  * `openssl`
-  * `subfinder` (for subdomain enumeration)
-  * `python3` (for CSV parsing)
-  * `figlet` (for ASCII banners)
+* Linux (tested on Debian 12)
 
-Ensure all dependencies are installed:
+### System Dependencies
+
+* `whois`
+* `dig` (DNS utilities)
+* `curl`
+* `openssl`
+* `subfinder`
+* `figlet`
+* `python3`, `pip`, `venv`
+
+### Python Dependencies (Stage 2)
+
+Listed in `requirements.txt`:
+
+```
+playwright
+python-Wappalyzer
+requests
+beautifulsoup4
+```
+
+Install via:
 
 ```bash
-sudo apt install whois dnsutils curl openssl python3 figlet
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip --break-system-packages
+pip install -r requirements.txt --break-system-packages
 
-# Install subfinder separately
-sudo apt update
-sudo apt install wget unzip -y
-
-wget https://github.com/projectdiscovery/subfinder/releases/download/v2.6.5/subfinder_2.6.5_linux_amd64.zip
-
-unzip subfinder_2.6.5_linux_amd64.zip
-sudo mv subfinder /usr/local/bin/
-sudo chmod +x /usr/local/bin/subfinder
-
-subfinder -version
-
+# Install browser dependencies for Playwright
+playwright install
 ```
 
 ---
 
 ## Installation
 
-Clone the repository and give execution permissions:
-
 ```bash
 git clone https://github.com/xRiot45/GhostTrace.git
 cd GhostTrace
-chmod +x main.sh
+chmod +x src/bash/main.sh
 ```
 
 ---
 
 ## Usage
 
-Run the main script with a target domain:
+### Run the tool
 
 ```bash
-sudo ./main.sh <domain>
+sudo ./src/bash/main.sh <domain>
 ```
 
 Example:
 
 ```bash
-sudo ./main.sh example.com
+sudo ./src/bash/main.sh example.com
 ```
 
----
-
-## Directory Structure
+### Project Structure
 
 ```
-results/
-  ├── raw/          # Raw outputs (WHOIS, DNS, Subdomains, Hosting, SSL)
-  └── parsed/       # Parsed CSV reports
-stages/
-  └── general_info.sh # Stage 1 script for general info collection
-main.sh               # Entry point of GhostTrace
-parser.py             # Converts raw data into CSV
+data/
+  ├── raw/         # Raw output (WHOIS, DNS, Subdomains, Hosting, SSL, Technology)
+  └── parsed/      # Parsed CSV reports
+src/
+  ├── bash/        # Footprinting stage scripts
+  │   ├── general_info.sh       # Stage 1
+  │   ├── technology_info.sh    # Stage 2
+  │   └── main.sh               # Main menu
+  └── python/      # Parser & technology detection
+      ├── parser.py
+      └── tech_detect.py
+venv/
+requirements.txt
 ```
 
 ---
@@ -109,30 +133,60 @@ parser.py             # Converts raw data into CSV
 3. Subdomain Enumeration
 4. Hosting/Server Info (Geo-IP)
 5. SSL/TLS Certificate Info
-6. Run ALL (executes all above modules)
+6. Run ALL
 
-### Report Generation
+### Stage 2: Web Application Technology Information
 
-* Converts raw results into a consolidated CSV file located in `results/parsed/<domain>_footprinting.csv`.
+1. **Web Server Detection**
+
+   * Extracts the `Server:` header from HTTP/HTTPS responses.
+2. **CMS / Framework Detection (Wappalyzer)**
+
+   * Uses Playwright + python-Wappalyzer for webpage content analysis.
+3. **Programming Language Detection**
+
+   * Detects `X-Powered-By:` header (e.g., PHP, ASP.NET).
+4. **Database Indicators**
+
+   * Searches for MySQL, PostgreSQL, MongoDB, SQLite strings in page content.
+5. **Libraries / Plugins Detection**
+
+   * Identifies libraries and plugins using Wappalyzer.
+6. **Run ALL**
+
+---
+
+## Report Generation
+
+Raw scan results are saved in:
+
+```
+data/raw/<domain>/technology_info/
+```
+
+Then processed by `parser.py` into CSV:
+
+```
+data/parsed/<domain>_footprinting.csv
+```
 
 ---
 
 ## Output Example
 
-**WHOIS Data**: `results/raw/<domain>/whois.txt`
-**DNS Records**: `results/raw/<domain>/dns.txt`
-**Subdomains**: `results/raw/<domain>/subdomains.txt`
-**Hosting Info**: `results/raw/<domain>/hosting.json`
-**SSL Certificate**: `results/raw/<domain>/ssl_cert.txt`
+* **Web Server**: `data/raw/<domain>/technology_info/web_server.txt`
+* **CMS / Framework**: `data/raw/<domain>/technology_info/cms_framework.txt`
+* **Languages**: `data/raw/<domain>/technology_info/languages.txt`
+* **Database Indicators**: `data/raw/<domain>/technology_info/database.txt`
+* **Libraries / Plugins**: `data/raw/<domain>/technology_info/libraries_plugins.txt`
 
 ---
 
 ## Roadmap
 
-* Stage 2: Web Application Technology Information
-* Stage 3: Basic Vulnerability Enumeration
-* JSON and HTML report formats
-* API integrations (Shodan, Censys)
+* Stage 3: Basic Vulnerability Enumeration (CVE, Known Exploits)
+* JSON/HTML report generation
+* External API integration (Shodan, Censys, BuiltWith)
 
 ---
 
