@@ -16,25 +16,33 @@ run_python() {
     fi
 }
 
-# =============================
-# DETECTION FUNCTIONS
-# =============================
-
 # Web Server Detection
 detect_web_server() {
     print_box "Detecting Web Server for $TARGET" "${CYAN}"
     loading
     curl -s -I "http://$TARGET" | grep -i "Server:" >"$RAW_DIR_TECH/web_server.txt"
     curl -s -I "https://$TARGET" | grep -i "Server:" >>"$RAW_DIR_TECH/web_server.txt"
-    echo -e "${GREEN}[+] Web server info saved to $RAW_DIR_TECH/web_server.txt${NC}"
+
+    if [ ! -s "$RAW_DIR_TECH/web_server.txt" ]; then
+        echo "404 Not Found" >"$RAW_DIR_TECH/web_server.txt"
+        echo -e "${RED}[!] Web server not detected (404 Not Found)${NC}"
+    else
+        echo -e "${GREEN}[+] Web server info saved to $RAW_DIR_TECH/web_server.txt${NC}"
+    fi
 }
 
-# CMS / Framework Detection (call tech_detect.py)
+# CMS / Framework Detection (Python Wappalyzer)
 detect_cms_framework() {
     print_box "Detecting CMS / Framework (Wappalyzer) for $TARGET" "${CYAN}"
     loading
-    run_python tech_detect.py "https://$TARGET" >"$RAW_DIR_TECH/cms_framework.txt" 2>&1
-    echo -e "${GREEN}[+] CMS / Framework info saved to $RAW_DIR_TECH/cms_framework.txt${NC}"
+    result=$(run_python tech_detect.py "https://$TARGET")
+    echo "$result" >"$RAW_DIR_TECH/cms_framework.txt"
+
+    if grep -q "404 Not Found" "$RAW_DIR_TECH/cms_framework.txt"; then
+        echo -e "${RED}[!] CMS / Framework not detected (404 Not Found)${NC}"
+    else
+        echo -e "${GREEN}[+] CMS / Framework info saved to $RAW_DIR_TECH/cms_framework.txt${NC}"
+    fi
 }
 
 # Programming Languages Detection
@@ -43,7 +51,13 @@ detect_languages() {
     loading
     curl -s -I "http://$TARGET" | grep -i "X-Powered-By:" >"$RAW_DIR_TECH/languages.txt"
     curl -s -I "https://$TARGET" | grep -i "X-Powered-By:" >>"$RAW_DIR_TECH/languages.txt"
-    echo -e "${GREEN}[+] Programming languages info saved to $RAW_DIR_TECH/languages.txt${NC}"
+
+    if [ ! -s "$RAW_DIR_TECH/languages.txt" ]; then
+        echo "404 Not Found" >"$RAW_DIR_TECH/languages.txt"
+        echo -e "${RED}[!] Programming languages not detected (404 Not Found)${NC}"
+    else
+        echo -e "${GREEN}[+] Programming languages info saved to $RAW_DIR_TECH/languages.txt${NC}"
+    fi
 }
 
 # Database Indicators
@@ -52,20 +66,29 @@ detect_database() {
     loading
     curl -s "http://$TARGET" | grep -iE "MySQL|PostgreSQL|MongoDB|SQLite" >"$RAW_DIR_TECH/database.txt"
     curl -s "https://$TARGET" | grep -iE "MySQL|PostgreSQL|MongoDB|SQLite" >>"$RAW_DIR_TECH/database.txt"
-    echo -e "${GREEN}[+] Database indicators saved to $RAW_DIR_TECH/database.txt${NC}"
+
+    if [ ! -s "$RAW_DIR_TECH/database.txt" ]; then
+        echo "404 Not Found" >"$RAW_DIR_TECH/database.txt"
+        echo -e "${RED}[!] Database indicators not detected (404 Not Found)${NC}"
+    else
+        echo -e "${GREEN}[+] Database indicators saved to $RAW_DIR_TECH/database.txt${NC}"
+    fi
 }
 
-# Libraries / Plugins Detection (Fallback pakai whatweb)
+# Libraries / Plugins Detection (Python Wappalyzer)
 detect_libraries_plugins() {
-    print_box "Detecting Libraries & Plugins for $TARGET" "${CYAN}"
+    print_box "Detecting Libraries & Plugins (Wappalyzer) for $TARGET" "${CYAN}"
     loading
-    whatweb $TARGET --color=never >"$RAW_DIR_TECH/libraries_plugins.txt"
-    echo -e "${GREEN}[+] Libraries / Plugins info saved to $RAW_DIR_TECH/libraries_plugins.txt${NC}"
+    result=$(run_python tech_detect.py "https://$TARGET")
+    echo "$result" >"$RAW_DIR_TECH/libraries_plugins.txt"
+
+    if grep -q "404 Not Found" "$RAW_DIR_TECH/libraries_plugins.txt"; then
+        echo -e "${RED}[!] Libraries / Plugins not detected (404 Not Found)${NC}"
+    else
+        echo -e "${GREEN}[+] Libraries / Plugins info saved to $RAW_DIR_TECH/libraries_plugins.txt${NC}"
+    fi
 }
 
-# =============================
-# MENU
-# =============================
 run_phase2() {
     while true; do
         echo ""
