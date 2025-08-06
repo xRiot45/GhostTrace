@@ -3,10 +3,10 @@
 TARGET=$TARGET
 TARGET=$(echo $TARGET | sed -e 's~^[^/]*//~~' -e 's~/.*$~~')
 
-RAW_DIR_TECH="results/raw/$TARGET/technology_info"
+RAW_DIR_TECH="data/raw/$TARGET/technology_info"
 mkdir -p "$RAW_DIR_TECH"
 
-VENV_PATH="$(dirname "$0")/venv"
+VENV_PATH="$(dirname "$0")/../../venv"
 
 run_python() {
     if [ -d "$VENV_PATH" ]; then
@@ -35,7 +35,7 @@ detect_web_server() {
 detect_cms_framework() {
     print_box "Detecting CMS / Framework (Wappalyzer) for $TARGET" "${CYAN}"
     loading
-    result=$(run_python tech_detect.py "https://$TARGET")
+    result=$(run_python src/python/tech_detect.py "https://$TARGET")
     echo "$result" >"$RAW_DIR_TECH/cms_framework.txt"
 
     if grep -q "404 Not Found" "$RAW_DIR_TECH/cms_framework.txt"; then
@@ -79,7 +79,7 @@ detect_database() {
 detect_libraries_plugins() {
     print_box "Detecting Libraries & Plugins (Wappalyzer) for $TARGET" "${CYAN}"
     loading
-    result=$(run_python tech_detect.py "https://$TARGET")
+    result=$(run_python src/python/tech_detect.py "https://$TARGET")
     echo "$result" >"$RAW_DIR_TECH/libraries_plugins.txt"
 
     if grep -q "404 Not Found" "$RAW_DIR_TECH/libraries_plugins.txt"; then

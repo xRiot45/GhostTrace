@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Directories
-RAW_DIR="results/raw"
-PARSED_DIR="results/parsed"
+RAW_DIR="data/raw"
+PARSED_DIR="data/parsed"
 mkdir -p $RAW_DIR $PARSED_DIR
 
 # Validate target input
@@ -24,9 +24,9 @@ echo -e "${CYAN}Target:${NC} $TARGET"
 echo -e "${YELLOW}────────────────────────────────────────────${NC}"
 
 # Load stage scripts
-source utils.sh
-source stages/general_info.sh
-source stages/technology_info.sh
+source src/utils/utils.sh
+source src/bash/general_info.sh
+source src/bash/technology_info.sh
 
 while true; do
     echo ""

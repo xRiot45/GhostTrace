@@ -1,0 +1,4 @@
+playwright
+python-Wappalyzer
+requests
+beautifulsoup4

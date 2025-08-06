@@ -1,5 +1,6 @@
 # Ignore results folder (raw data & parsed reports)
 results/
+data/
 
 # Ignore Python cache
 __pycache__/

@@ -3,16 +3,14 @@ import os
 import csv
 
 if len(sys.argv) < 3:
-    print("Usage: python3 parser.py <target> <stage>")
-    print("Stage options: general | tech")
     sys.exit(1)
 
 target = sys.argv[1]
 stage = sys.argv[2].lower()
 
-raw_dir_general = f"results/raw/{target}/general_info"
-raw_dir_tech = f"results/raw/{target}/technology_info"
-parsed_dir = "results/parsed"
+raw_dir_general = f"data/raw/{target}/general_info"
+raw_dir_tech = f"data/raw/{target}/technology_info"
+parsed_dir = "data/parsed"
 os.makedirs(parsed_dir, exist_ok=True)
 
 def read_file(path, filename):

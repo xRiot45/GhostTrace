@@ -3,7 +3,7 @@
 TARGET=$TARGET
 TARGET=$(echo $TARGET | sed -e 's~^[^/]*//~~' -e 's~/.*$~~') # Remove protocol
 
-RAW_DIR_GENERAL="results/raw/$TARGET/general_info"
+RAW_DIR_GENERAL="data/raw/$TARGET/general_info"
 
 # WHOIS
 whois_info() {
